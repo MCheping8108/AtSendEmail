@@ -48,6 +48,9 @@ function sanitizeConfig(raw: unknown): PluginConfig {
         }
     }
 
+    // API密钥字段处理
+    if (typeof raw.apiKey === 'string') out.apiKey = raw.apiKey;
+
     // TODO: 在这里添加你的配置项清洗逻辑
 
     return out;

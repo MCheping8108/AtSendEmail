@@ -24,6 +24,8 @@ export interface PluginConfig {
     cooldownSeconds: number;
     /** 按群的单独配置 */
     groupConfigs: Record<string, GroupConfig>;
+    /** Resend API密钥 */
+    apiKey: string;
     // TODO: 在这里添加你的插件配置项
 }
 

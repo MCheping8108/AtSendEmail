@@ -80,13 +80,13 @@ export const plugin_onmessage: PluginModule['plugin_onmessage'] = async (ctx, ev
     await handleMessage(ctx, event);
 
     // const apikeyaccount = process.env.APIKEY;
-
-    const resend = new Resend('re_your_api_key');
-
+    
     // const SendTargetEmail = event.raw_message.split("发送邮件：")[1].trim();
 
     if (event.raw_message.trim().startsWith("发送邮件：")) {
-        if (!resend) {
+        const resend = new Resend(pluginState.config.apiKey);
+
+        if (!resend || !pluginState.config.apiKey) {
             ctx.logger.error('Resend API Key 未配置');
             return;
         }
@@ -135,12 +135,33 @@ export const plugin_onmessage: PluginModule['plugin_onmessage'] = async (ctx, ev
     };
 
     if (event.raw_message === "[CQ:at,qq=2480591482]"){
+        const resend = new Resend(pluginState.config.apiKey);
+
+        if (!resend || !pluginState.config.apiKey) {
+            ctx.logger.error('Resend API Key 未配置');
+            return;
+        }
+        
         await ctx.actions.call('send_msg', {
-            message: '你正在at Columbula，已自动发送邮件',
+            message: '你正在at Columbula，请等待20秒，超时后自动发送邮件',
             at: true,
             group_id: event.group_id,
             user_id: event.user_id,
         },ctx.adapterName, ctx.pluginManager.config);
+
+        // 等待20秒
+        await new Promise(resolve => setTimeout(resolve, 20000));
+
+        // 如果qq号为2480591482，不发送邮件
+        if (event.user_id === 2480591482) {
+            await ctx.actions.call('send_msg', {
+                message: '邮件发送已取消',
+                at: true,
+                group_id: event.group_id,
+                user_id: event.user_id,
+            },ctx.adapterName, ctx.pluginManager.config);
+            return;
+        }
 
         await resend.emails.send({
             from: "resend@peacefuly.top",

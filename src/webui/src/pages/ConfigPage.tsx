@@ -87,6 +87,12 @@ export default function ConfigPage() {
                         type="number"
                         onChange={(v) => updateField('cooldownSeconds', Number(v) || 0)}
                     />
+                    <InputRow
+                        label="API密钥"
+                        desc="用于与Resend API交互的密钥"
+                        value={config.apiKey}
+                        onChange={(v) => updateField('apiKey', v)}
+                    />
                     {/* TODO: 在这里添加你的配置项 */}
                 </div>
             </div>

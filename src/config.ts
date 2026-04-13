@@ -13,6 +13,7 @@ export const DEFAULT_CONFIG: PluginConfig = {
     commandPrefix: '#cmd',
     cooldownSeconds: 60,
     groupConfigs: {},
+    apiKey: 're_example',
     // TODO: 在这里添加你的默认配置值
 };
 
@@ -45,7 +46,9 @@ export function buildConfigSchema(ctx: NapCatPluginContext): PluginConfigSchema 
         // 命令前缀
         ctx.NapCatConfig.text('commandPrefix', '命令前缀', '#cmd', '触发命令的前缀，默认为 #cmd'),
         // 冷却时间
-        ctx.NapCatConfig.number('cooldownSeconds', '冷却时间（秒）', 60, '同一命令请求冷却时间，0 表示不限制')
+        ctx.NapCatConfig.number('cooldownSeconds', '冷却时间（秒）', 60, '同一命令请求冷却时间，0 表示不限制'),
+        // API密钥
+        ctx.NapCatConfig.text('apiKey', 'Resend API密钥', '用于发送邮件的Resend API密钥')
         // TODO: 在这里添加你的配置项
     );
 }

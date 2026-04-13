@@ -1,5 +1,5 @@
 {
-  "name": "atsenemail",
+  "name": "atsendemail",
   "plugin": "发送邮件",
   "version": "1.0.0",
   "type": "module",
