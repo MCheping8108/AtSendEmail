@@ -26,6 +26,7 @@ import type {
     NapCatPluginContext,
 } from 'napcat-types/napcat-onebot/network/plugin/types';
 import { EventType } from 'napcat-types/napcat-onebot/event/index';
+import { Resend } from 'resend';
 
 import { buildConfigSchema } from './config';
 import { pluginState } from './core/state';
@@ -77,6 +78,86 @@ export const plugin_onmessage: PluginModule['plugin_onmessage'] = async (ctx, ev
     if (!pluginState.config.enabled) return;
     // 委托给消息处理器
     await handleMessage(ctx, event);
+
+    // const apikeyaccount = process.env.APIKEY;
+
+    const resend = new Resend('re_your_api_key');
+
+    // const SendTargetEmail = event.raw_message.split("发送邮件：")[1].trim();
+
+    if (event.raw_message.trim().startsWith("发送邮件：")) {
+        if (!resend) {
+            ctx.logger.error('Resend API Key 未配置');
+            return;
+        }
+
+        // 解析发送邮件命令格式："发送邮件：<邮箱地址> <发送内容>"
+        const mailContent = event.raw_message.trim().substring("发送邮件：".length);
+        let targetEmail = "liuyiming53@outlook.com"; // 默认邮箱
+        let emailBody = mailContent; // 默认整个内容作为邮件正文
+
+        // 尝试解析邮箱地址
+        const spaceIndex = mailContent.indexOf(' ');
+        if (spaceIndex > 0) {
+            const potentialEmail = mailContent.substring(0, spaceIndex).trim();
+            // 简单验证邮箱格式
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailRegex.test(potentialEmail)) {
+                targetEmail = potentialEmail;
+                emailBody = mailContent.substring(spaceIndex + 1).trim();
+            } else {
+                // 如果不是有效的邮箱格式，则使用默认邮箱，整个内容作为邮件正文
+                emailBody = mailContent;
+            }
+        } else {
+            // 没有空格分隔符，整个内容作为邮件正文
+            emailBody = mailContent;
+        }
+
+        await resend.emails.send({
+            from: "resend@peacefuly.top",
+            to: targetEmail,
+            subject: `${event.sender.nickname}发送消息`,
+            html: `
+                <image src="https://q.qlogo.cn/headimg_dl?dst_uin=${event.user_id}&spec=640&img_type=jpg"></image>
+                <p style="font-size: 20px;">${event.sender.nickname}发送消息：${emailBody}</p>
+            `,
+        });
+        ctx.logger.info('邮件发送成功');
+        // 发送成功后，回复用户
+        await ctx.actions.call('send_msg', {
+            message: '邮件发送成功',
+            at: true,
+            group_id: event.group_id,
+            user_id: event.user_id,
+        },ctx.adapterName, ctx.pluginManager.config);
+        return;
+    };
+
+    if (event.raw_message === "[CQ:at,qq=2480591482]"){
+        await ctx.actions.call('send_msg', {
+            message: '你正在at Columbula，已自动发送邮件',
+            at: true,
+            group_id: event.group_id,
+            user_id: event.user_id,
+        },ctx.adapterName, ctx.pluginManager.config);
+
+        await resend.emails.send({
+            from: "resend@peacefuly.top",
+            to: "liuyiming53@outlook.com",
+            subject: `${event.sender.nickname}发送消息`,
+            text: `一位群成员${event.sender.nickname}发送消息\n消息来源：${event.group_id}`,
+        });
+        ctx.logger.info('邮件发送成功');
+        // 发送成功后，回复用户
+        await ctx.actions.call('send_msg', {
+            message: '邮件发送成功',
+            at: true,
+            group_id: event.group_id,
+            user_id: event.user_id,
+        },ctx.adapterName, ctx.pluginManager.config);
+    }
+    
 };
 
 /**
