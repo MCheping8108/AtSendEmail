@@ -21,6 +21,7 @@
     "homepage": ""
   },
   "dependencies": {
+    "esbuild": "0.25.12",
     "napcat-types": "0.0.16",
     "resend": "^6.10.0"
   },
