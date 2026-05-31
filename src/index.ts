@@ -143,25 +143,11 @@ export const plugin_onmessage: PluginModule['plugin_onmessage'] = async (ctx, ev
         }
         
         await ctx.actions.call('send_msg', {
-            message: '你正在at Columbula，请等待20秒，超时后自动发送邮件',
+            message: '邮件发送成功',
             at: true,
             group_id: event.group_id,
             user_id: event.user_id,
         },ctx.adapterName, ctx.pluginManager.config);
-
-        // 等待20秒
-        await new Promise(resolve => setTimeout(resolve, 20000));
-
-        // 如果qq号为2480591482，不发送邮件
-        if (event.user_id === 2480591482) {
-            await ctx.actions.call('send_msg', {
-                message: '邮件发送已取消',
-                at: true,
-                group_id: event.group_id,
-                user_id: event.user_id,
-            },ctx.adapterName, ctx.pluginManager.config);
-            return;
-        }
 
         await resend.emails.send({
             from: "resend@peacefuly.top",
@@ -169,14 +155,6 @@ export const plugin_onmessage: PluginModule['plugin_onmessage'] = async (ctx, ev
             subject: `${event.sender.nickname}发送消息`,
             text: `一位群成员${event.sender.nickname}发送消息\n消息来源：${event.group_id}`,
         });
-        ctx.logger.info('邮件发送成功');
-        // 发送成功后，回复用户
-        await ctx.actions.call('send_msg', {
-            message: '邮件发送成功',
-            at: true,
-            group_id: event.group_id,
-            user_id: event.user_id,
-        },ctx.adapterName, ctx.pluginManager.config);
     }
     
 };
